@@ -1,161 +1,114 @@
-# Artist Studio Portfolio Website
+# NLYTN Studio - Portfolio & Booking Website
 
-An open-source Django-based website template, originally developed for nlytnmusic (Siddhesh Parekh). This project
-provides musicians with a platform to showcase their work, manage events, share blog posts, and rent out their music
-studios. The website was live from 2020 to 2023 and can be viewed via the [archived link](https://web.archive.org/web/20220210082301/https://nlytnmusic.com/).
+A modern, high-performance static website for music studios and audio post-production facilities. Built with pure HTML, vanilla CSS, and JavaScript.
 
-## Features
+## ✨ Features
 
-- **Song Showcase**: Display songs and albums with detailed descriptions.
-- **Event Management**: Announce and manage bookings for upcoming events.
-- **Blog Posts**: Share updates and thoughts with fans.
-- **Studio Rentals**: Integrated system for renting out music studios.
-- **SEO Friendly**: Dynamic sitemaps to improve search engine indexing.
-- **Spotify Integration**: Input trackId from Spotify to generate a small Spotify preview player on the website.
-- **Google reCAPTCHA**: Integrated reCAPTCHA for spam prevention in forms.
-- **Payment Integration**: Allows for coffee donations and booking payments through Razorpay.
-- **Dynamic Sections**: Sections on the site are dynamically hidden or shown based on the data inputted in the admin
-  dashboard.
+- **Interactive Landing Page**: Full-screen video/image hero, smooth section navigation, and animations.
+- **Studio Showcase**: Acoustic room details, gear highlights, and living-room style production overview.
+- **Equipment Showcase**: High-res visual equipment cards (Digital Synthesizers, Keyboards, Audio Monitors, Outboard Gear).
+- **3-Column Technical Specifications**: High-contrast, clean equipment specs for Microphones, Monitoring, and Compression/Limiting.
+- **Interactive Calendar & Slot Selector**:
+  - Browse calendar months and days.
+  - Select continuous hourly slots (up to 5 hours).
+  - Validation ensures valid, continuous bookings without double-booking.
+- **Booking Request Modal**:
+  - Collects client name, email, phone, and project notes.
+  - Pre-fills selected date and time slots.
+  - Submits requests via standard form services (Web3Forms, Formspree, or custom webhook).
+  - Displays instant on-page confirmation.
+- **Client Testimonials**: Social proof and artist review cards.
+- **Social & Music Streaming Links**: Spotify, Apple Music, YouTube, SoundCloud, Instagram, Facebook, and Email.
+- **Zero-Dependency & Zero Server Maintenance**: Pure static files ready to deploy anywhere for free.
 
-## Getting Started
+---
 
-These instructions will help you set up the project on your local machine for development and testing purposes.
+## 🚀 Quick Start (Local Preview)
 
-Refer to [Setup_Instructions.md](Setup_Instructions.md) for detailed setup instructions.
+No installations, build steps, or database configurations required.
 
-### Prerequisites
+You can preview the site using any static web server:
 
-- Python 3.x
-- Django 5.x
-- Virtualenv
+### Option A: Python Built-in Server
+```bash
+python -m http.server 8080
+```
+Open [http://localhost:8080](http://localhost:8080) in your browser.
 
-### Configuration
+### Option B: Node / npx
+```bash
+npx serve .
+```
 
-1. **ASGI Configuration**:
-   The ASGI configuration is located in `artist/asgi.py`. It exposes the ASGI callable as a module-level variable
-   named `application`.
+### Option C: VS Code Live Server
+Right-click `index.html` and select **"Open with Live Server"**.
 
-2. **Settings Configuration**:
-   The settings are located in `artist/settings.py`. The key configurations include:
-    - Environment Variables: Managed with `django-environ` to keep sensitive information secure.
-    - Installed Apps: Lists all Django applications and third-party apps used in the project.
-    - Middleware: Includes security, session, authentication, and other middleware.
-    - Database: Configured with SQLite by default, can be switched to PostgreSQL or other databases.
-    - Static and Media Files: Configured paths for handling static and media files.
+---
 
-   Refer to `example.env` for environment variables setup in `.env`.
+## 🌐 Deployment (Ready for Any Platform)
 
-3. **Sitemaps Configuration**:
-   Sitemaps are defined in `artist/sitemaps.py` to improve the site's SEO by helping search engines index the site more
-   effectively.
+Since this is a pure static website, you can deploy it in seconds with zero configuration:
 
-### Connecting to External Services
+### 1. GitHub Pages
+1. Push this repository to GitHub.
+2. In your repo settings, go to **Pages**.
+3. Under **Build and deployment**, select **Source: Deploy from a branch** -> `main` / `root`.
+4. Click **Save**. Your site is live!
 
-To use an external database like AWS S3 bucket and PostgreSQL hosted on AWS, follow these steps:
+### 2. Vercel
+1. Import this repository in [vercel.com](https://vercel.com).
+2. Framework Preset: **Other** (Root directory: `./`).
+3. Click **Deploy**.
 
-1. **AWS S3 Bucket for Media Files**:
-    - Install the `django-storages` package:
-        ```bash
-            pip install django-storages[boto3]
-        ```
-    - Update your `settings.py`:
-        ```python
-      DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-      AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
-      AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
-      AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME')
-      AWS_S3_REGION_NAME = env('AWS_S3_REGION_NAME', default='us-east-1')
-        ```
+### 3. Netlify
+1. Drag and drop this folder onto [app.netlify.com/drop](https://app.netlify.com/drop), or connect your Git repository.
+2. Publish directory: `.`
+3. Click **Deploy Site**.
 
-2. **PostgreSQL Database**:
-    - Install the `psycopg2` package:
-        ```bash
-      pip install psycopg2
-        ```
-    - Update your `settings.py`:
-        ```python
-      DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.postgresql',
-                'NAME': env('DATABASE_NAME'),
-                'USER': env('DATABASE_USER'),
-                'PASSWORD': env('DATABASE_PASSWORD'),
-                'HOST': env('DATABASE_HOST', 'localhost'),
-                'PORT': env('DATABASE_PORT', '5432'),
-            }
-        }
-        ```
+### 4. Cloudflare Pages
+1. Connect repo in Cloudflare Dashboard -> **Pages**.
+2. Build command: *(leave empty)*
+3. Build output directory: `.`
 
-### Integrated Functionalities
+---
 
-- **Django REST Framework**:
-    - Provides powerful and flexible tools for building Web APIs.
-    - Used for creating API endpoints to interact with the frontend and other services.
+## ⚙️ Configuring Booking Form Notifications
 
-- **Django Contrib Sitemaps**:
-    - Generates sitemaps dynamically as users add new pages and blogs.
-    - Improves SEO by making the site more accessible to search engine crawlers.
+By default, the booking modal simulates submission with instant on-page confirmation.
 
-- **Meta**:
-    - Manages metadata for SEO and social media sharing.
-    - Allows easy integration of Open Graph, Twitter Cards, and other metadata.
+To receive instant email notifications whenever a client books:
+1. Get a free form access key from [Web3Forms](https://web3forms.com/) or a form endpoint from [Formspree](https://formspree.io/).
+2. In `index.html`, update the `<form id="booking-request-form" ...>` action attribute:
+   ```html
+   <form id="booking-request-form" action="https://api.web3forms.com/submit" method="POST">
+       <input type="hidden" name="access_key" value="YOUR_ACCESS_KEY_HERE">
+   ```
+3. That's it! Booking requests will be delivered directly to your inbox.
 
-### API Endpoints
+---
 
-Refer to [API_Endpoints.md](API_Endpoints.md) for detailed information on the available API endpoints.
+## 📁 Project Structure
 
-### Database Design
-
-Refer to [DB_Design.md](DB_Design.md) for detailed information on the database design, including table structures and
-relationships.
-
-## Deployment
-
-Details on how to deploy this project to a live system can be found in
-the [Django deployment documentation](https://docs.djangoproject.com/en/5.0/howto/deployment/).
-
-## Screenshots and GIFs
-
-### Home Page Landing Animation
-![Home Page](screens/home_page.gif)
-
-### Studio Page
-![Studio Page](screens/studio_page.gif)
-
-### Features
-![Blogs Features](screens/blogs_features.png)
-![Contact Social Feature](screens/contact_social_feature.png)
-![Spotify Preview Player Feature](screens/spotify_preview_player_feature.png)
-![Studio Booking Feature](screens/studio_booking_feature.png)
-![Studio Description Section](screens/studio_description_section.png)
-![Studio Specs Section](screens/studio_specs_section.png)
-![Testimonials Feature](screens/testimonials_feature.png)
-![Upcoming Gigs Feature](screens/upcoming_gigs_feature.png)
-
-## Contributing
-
-Contributions are welcome! Here are some guidelines:
-
-1. Fork the repository.
-2. Create a new branch for your feature or bugfix.
-3. Commit your changes with a descriptive message.
-4. Push your branch to your forked repository.
-5. Create a pull request with a description of your changes.
-
-## License
-
-### Code License
-The code in this repository is open-source and licensed under the MIT License. Please refer to the `LICENSE.md` file for the full license text.
-
-### Content License
-Any text, images, and sound content, including but not limited to those tagged with NLYTN, are not covered under the MIT License and are instead licensed under the terms specified by NLYTN Music. For any use of such content, please contact NLYTN Music at [NLYTN Music](https://www.maayasound.com/nlytn).
-
-## Special Thanks
-A special thanks to [NLYTN Music](https://www.maayasound.com/nlytn) for helping the music community. Please go and support him and show your love.
-
-## End of Life Notice
-This project uses CKEditor 4, which has reached its end of life as of June 2023. Additionally, some dependencies have moved towards GPL licensing, and some are no longer maintained. Please review the licensing terms of third-party integrations to ensure compliance.
-
-I have ensured that most libraries and versions are up-to-date as of 2024, but substantial efforts may be needed to migrate some libraries and frontend components to more modern frameworks and libraries.
-
-For new features or support with migration, please open issues with your requests or bugs with the recent code.
+```
+├── index.html                   # Complete Studio Landing Page
+├── Readme.md                    # Documentation & Deployment Guide
+├── LICENSE.md                   # License
+├── .gitignore                   # Git Ignore configuration
+└── static/
+    ├── css/
+    │   ├── main-studio.css      # Studio layout & core styles
+    │   ├── style-studio.css     # Studio typography & components
+    │   ├── style-calendar.css   # Interactive calendar styles
+    │   ├── booking-modal.css    # Booking request modal popup styles
+    │   ├── menu-image.css       # Navigation header styles
+    │   └── libse.css            # Base utilities
+    ├── js/
+    │   ├── script-calendar.js   # Interactive booking calendar logic
+    │   ├── booking-modal.js     # Modal controller & submission handler
+    │   ├── script-studio.js     # Navigation & animations
+    │   ├── skip-link-focus-fix.js
+    │   └── vendors/
+    │       └── jquery-3.7.1.min.js
+    ├── images/                  # Studio photography, showcase, & icons
+    └── fonts/                   # Space Grotesk fonts
+```

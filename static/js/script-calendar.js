@@ -100,24 +100,39 @@ app.directive('datePicker', function ($timeout, $window) {
 				}
 			}
 
-			async function fetchMoviesJSON() {
-				const response = await fetch('/studio/bookings/close/');
-				if (response.ok) {
-				    const data = await response.json();
-				    const reposList = data.map(data => data.date);
-				    getDaysInMonth(reposList[0])
-				    getSelected();
-				    scope.$apply();
-                } else {
-                    var headerColor = $('.datepicker .datepicker-header');
-						headerColor.css({
-							background: '#34495e'
-						});
-						scope.timeString = "- Too many requests. Try after a day.";
-                    getDaysInMonth(new Date())
-				    getSelected();
-				    scope.$apply();
-                }
+			function getAvailableSlots(dateStr) {
+				var defaultSlots = [
+					{"value": 0, "text": "10:00", "defaultSelected": true, "selected": false},
+					{"value": 1, "text": "11:00", "defaultSelected": true, "selected": false},
+					{"value": 2, "text": "12:00", "defaultSelected": true, "selected": false},
+					{"value": 3, "text": "13:00", "defaultSelected": true, "selected": false},
+					{"value": 4, "text": "14:00", "defaultSelected": true, "selected": false},
+					{"value": 5, "text": "15:00", "defaultSelected": true, "selected": false},
+					{"value": 6, "text": "16:00", "defaultSelected": true, "selected": false},
+					{"value": 7, "text": "17:00", "defaultSelected": true, "selected": false},
+					{"value": 8, "text": "18:00", "defaultSelected": true, "selected": false},
+					{"value": 9, "text": "19:00", "defaultSelected": true, "selected": false}
+				];
+				return {
+					"data": {
+						"optgroups": [
+							{
+								"label": "Select your hours",
+								"options": defaultSlots
+							}
+						]
+					}
+				};
+			}
+
+			function initCalendarDays() {
+				var closeDate = new Date();
+				closeDate.setDate(closeDate.getDate() + 90);
+				getDaysInMonth(closeDate);
+				getSelected();
+				if (scope.$root.$$phase != '$apply' && scope.$root.$$phase != '$digest') {
+					scope.$apply();
+				}
 			}
 
 			function getDaysInMonth(bookingClose) {
@@ -156,9 +171,7 @@ app.directive('datePicker', function ($timeout, $window) {
 				scope.currentMonthName = function () {
 					return scope.monthNames[scope.currentViewDate.getMonth()];
 				};
-				//                getDaysInMonth();
-				//                getSelected();
-				fetchMoviesJSON();
+				initCalendarDays();
 			}
 
 			// Takes selected time and date and combines them into a date object
@@ -221,17 +234,11 @@ app.directive('datePicker', function ($timeout, $window) {
 				}
 				scope.arrayTime = [];
 				scope.arrayTimeString = new Map();
-				scope.bookingPlugin.destroy();
-				var bookigResponse = new XMLHttpRequest();
-				bookigResponse.onreadystatechange = function () {
-					if (bookigResponse.readyState === 4 && bookigResponse.status == 200) {
-						scope.bookingJson = JSON.parse(bookigResponse.responseText);
-						$('#select').timeselector(scope.bookingJson);
-					}
-				};
-
-				bookigResponse.open('GET', '/studio/bookings/' + formatDate(scope.localdate)  + '/', true);
-				bookigResponse.send();
+				if (scope.bookingPlugin) {
+					scope.bookingPlugin.destroy();
+				}
+				scope.bookingJson = getAvailableSlots(formatDate(scope.localdate));
+				$('#select').timeselector(scope.bookingJson);
 			};
 
 			scope.moveForward = function () {
@@ -239,9 +246,7 @@ app.directive('datePicker', function ($timeout, $window) {
 				if (scope.currentViewDate.getMonth() == 12) {
 					scope.currentViewDate.setDate(scope.currentViewDate.getFullYear() + 1, 0, 1);
 				}
-				//                getDaysInMonth();
-				//                getSelected();
-				fetchMoviesJSON();
+				initCalendarDays();
 			};
 
 			scope.moveBack = function () {
@@ -249,9 +254,7 @@ app.directive('datePicker', function ($timeout, $window) {
 				if (scope.currentViewDate.getMonth() == -1) {
 					scope.currentViewDate.setDate(scope.currentViewDate.getFullYear() - 1, 0, 1);
 				}
-				//                getDaysInMonth();
-				//                getSelected();
-				fetchMoviesJSON();
+				initCalendarDays();
 			};
 
 			scope.calcOffset = function (day, index) {
@@ -458,62 +461,19 @@ app.directive('datePicker', function ($timeout, $window) {
 					});
 					var length = scope.arrayTime.length;
 					if (length <= 5 && consecutive()) {
-						document.getElementById("save-button").innerText = "Loading! Stay Awsm!";
-					    document.getElementById('save-button').style.pointerEvents = 'none';
-
-						scope.time = scope.arrayTimeString.get(scope.arrayTime[0]);
-						scope.endTime = scope.arrayTimeString.get(scope.arrayTime[scope.arrayTime.length - 1]);
 						var fromTime = getDateAndTime(false);
 						var tillTime = getDateAndTime(true);
-						fromTime = fromTime.toLocaleTimeString([], {
-							hour: '2-digit',
-							minute: '2-digit',
-							second: '2-digit',
-							hour12: false
-						})
-						tillTime = tillTime.toLocaleTimeString([], {
-							hour: '2-digit',
-							minute: '2-digit',
-							second: '2-digit',
-							hour12: false
-						});
+						var dateFormatted = scope.monthNames[scope.localdate.getMonth()] + " " + scope.localdate.getDate() + ", " + scope.localdate.getFullYear();
+						var timeFormatted = fromTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + " - " + tillTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-                        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-						const data = { date: formatDate(scope.localdate), start_time: fromTime , end_time:  tillTime};
-
-						var formBody = [];
-                        for (var property in data) {
-                          var encodedKey = encodeURIComponent(property);
-                          var encodedValue = encodeURIComponent(data[property]);
-                          formBody.push(encodedKey + "=" + encodedValue);
-                        }
-                        formBody = formBody.join("&");
-
-                        fetch('/studio/bookings/gateway/', {
-                          method: 'POST',
-                          mode: 'same-origin',
-                          headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                            'Content-Length': formBody.length,
-                            'X-CSRFToken': csrftoken,
-                          },
-                          body: formBody,
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                          window.location.href = data.url;
-                        })
-                        .catch((error) => {
-                        document.getElementById("save-button").innerText = "Proceed to checkout";
-					    document.getElementById('save-button').style.pointerEvents = 'auto';
-					    var headerColor = $('.datepicker .datepicker-header');
-						headerColor.css({
-							background: '#34495e'
-						});
-						scope.timeString = " - Error! Try after sometime";
-						scope.$apply();
-                        });
-
+						if (window.openBookingModal) {
+							window.openBookingModal({
+								dateFormatted: dateFormatted,
+								dateRaw: formatDate(scope.localdate),
+								timeFormatted: timeFormatted,
+								hours: length
+							});
+						}
 					} else if (length == 0) {
 						var headerColor = $('.datepicker .datepicker-header');
 						headerColor.css({
@@ -584,22 +544,8 @@ app.directive('datePicker', function ($timeout, $window) {
 
 				//Attach plugin to all matching element
 				$(document).ready(function () {
-					var bookingResponse = new XMLHttpRequest();
-					bookingResponse.onreadystatechange = function () {
-						if (bookingResponse.readyState === 4 && bookingResponse.status == 200) {
-							scope.bookingJson = JSON.parse(bookingResponse.responseText);
-							$('#select').timeselector(scope.bookingJson);
-						}
-					};
-
-					bookingResponse.open('GET', '/studio/bookings/' + formatDate(scope.localdate) + '/', true);
-					bookingResponse.send();
-					// setTimeout(function(){
-					//   $(".timeselector").addClass('opened');
-					// }, 500);
-					// setTimeout(function(){
-					//   $(".timeselector").removeClass('opened');
-					// }, 1250);
+					scope.bookingJson = getAvailableSlots(formatDate(scope.localdate));
+					$('#select').timeselector(scope.bookingJson);
 				});
 			}
 			/////////////////////////
